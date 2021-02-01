@@ -8,8 +8,8 @@ public class LevelApprover : MonoBehaviour
 {
     public Tilemap spawnMap;
 
-    public Tile boxTile;
-    public GameObject prefabBox;
+    public SpawnableObjectBehaviour[] spawnableGameBojects;
+
 
     void Awake()
     {
@@ -18,38 +18,42 @@ public class LevelApprover : MonoBehaviour
 
     void Start()
     {
-        if (spawnMap.ContainsTile(boxTile))
+        SearchForSpawners(spawnMap, spawnableGameBojects);
+    }
+
+    void SearchForSpawners(Tilemap tileMap, SpawnableObjectBehaviour[] spawnableObjects)
+    {
+        if (spawnableGameBojects.Length > 0)
         {
-            Debug.Log("Es gibt eine oder mehrere Boxen!");
 
-            BoundsInt bounds = spawnMap.cellBounds;
-            TileBase[] allTiles = spawnMap.GetTilesBlock(bounds);
-
-            for (int x = 0; x < bounds.size.x; x++)
+            foreach (SpawnableObjectBehaviour spawner in spawnableObjects)
             {
-                for (int y = 0; y < bounds.size.y; y++)
+                Debug.Log("Objekte vom Typ " + spawner.nameOfEntity + " werden gesucht ...");
+
+                if (spawnMap.ContainsTile(spawner.spawnerTile))
                 {
-                    TileBase tile = allTiles[x + y * bounds.size.x];
-                    if (tile != null)
+                    Debug.Log("Objekte vom Typ " + spawner.nameOfEntity + " wurden gefunden!");
+                    BoundsInt bounds = tileMap.cellBounds;
+                    TileBase[] allTiles = tileMap.GetTilesBlock(bounds);
+
+                    for (int x = 0; x < bounds.size.x; x++)
                     {
-                        if (tile == boxTile)
+                        for (int y = 0; y < bounds.size.y; y++)
                         {
-                            Debug.Log("x:" + x + " y:" + y + " Box!");
-                            Instantiate(prefabBox, new Vector3(spawnMap.origin.x + x + 0.5f, spawnMap.origin.y + y + 0.5f, 0f), Quaternion.identity);
-                        }
-                        else
-                        {
-                            Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
+                            TileBase tile = allTiles[x + y * bounds.size.x];
+                            if (tile != null)
+                            {
+                                if (tile == spawner.spawnerTile)
+                                {
+                                    Debug.Log("x:" + x + " y:" + y + " Objekt: " + spawner.nameOfEntity);
+                                    Instantiate(spawner.spawnableGameObject, new Vector3(tileMap.origin.x + x + 0.5f, tileMap.origin.y + y + 0.5f, 0f), Quaternion.identity);
+                                }
+                            }
                         }
                     }
                 }
             }
             spawnMap.ClearAllTiles();
-
-        }
-        else
-        {
-            Debug.Log("Keine Boxen gefunden!");
         }
     }
 
@@ -68,6 +72,5 @@ public class LevelApprover : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Debug.Log("OnSceneLoaded: " + scene.name);
-        Debug.Log(mode);
     }
 }
