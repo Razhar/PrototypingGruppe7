@@ -41,29 +41,39 @@ public class PlayerController : MonoBehaviour
     {
         if (isMoving)
         {
-            transform.position = Vector3.Lerp(transform.position, new Vector3(nextPosition.x, nextPosition.y, 0), Time.deltaTime * speed);
+            transform.position = Vector3.Lerp(transform.position,
+                new Vector3(
+                    nextPosition.x,
+                    nextPosition.y,
+                    0),
+                Time.deltaTime * speed);
         }
         if (Vector3.Distance(transform.position, nextPosition) < 0.02 && isMoving)
         {
             isMoving = false;
+            transform.position = nextPosition;
         }
     }
 
     private void Move(Vector2 direction)
     {
-        if(CanMove(direction) && !isMoving)
+        if (CanMove(direction) && !isMoving)
         {
             nextPosition = transform.position + (Vector3)direction;
             isMoving = true;
         }
     }
 
-    private bool CanMove( Vector2 direction)
+    private bool CanMove(Vector2 direction)
     {
         Vector3Int gridPosition = groundTilemap.WorldToCell(transform.position + (Vector3)direction);
 
+        
+
         if (!groundTilemap.HasTile(gridPosition) || collisionTilemap.HasTile(gridPosition))
         {
+            string nameOfTile = collisionTilemap.GetTile(gridPosition).name;
+            Debug.Log("Hindernis heißt " + nameOfTile);
             return false;
         }
         return true;
